@@ -48,7 +48,7 @@ def genetic_algorithm(mat):
     
     # initialize population
     population = list()
-    dim = 32
+    dim = 100
     for i in range(0,dim):
         
         chrom = chromosome(mat)
@@ -61,32 +61,73 @@ def genetic_algorithm(mat):
         
         chrom.fitness = fitness(chrom)
         population.append(chrom)  
+        prevfit = best_fitness(population)
          
-    while (1):
+    while (len(population) != 0):
         
         # stopping criterion
         result = best_fitness(population)
+        bestfit = result.fitness
+        print('best fitness: ', bestfit)
         if result.fitness == 0:
             break
         
         # selection
-        new_dim = len(population) // 2
-        if new_dim % 2 != 0:
-            new_dim += 1
-            print(new_dim)
-    
-        new_population = list()
-        for i in range(0, new_dim):
+        sub = list()
+        if len(population) % 2 :
+            sub_dim = len(population) // 2 +1
+        else:
+            sub_dim = len(population) // 2
+        
+        for i in range(0, sub_dim):
             best = best_fitness(population)
-            population.remove(best)
-            new_population.append(best)
-    
-        population.clear()
-        population = new_population
+            sub.append(best)
     
         # crossover
+        l = [i for i in range(0, sub_dim)]
         
-    
+        for i in range(0, sub_dim // 2):
+            num1 = randint(0, len(l)-1)
+            first = l[num1]
+            l.remove(first)
+            num2 = randint(0, len(l)-1)
+            second = l[num2]
+            l.remove(second)
+            parent1 = sub[first]
+            parent2 = sub[second]
+            matrix = []
+            for i in range (0,5):
+                matrix.append(parent1.matrix[i])
+            for i in range (5,9):
+                matrix.append(parent2.matrix[i])
+            
+            m = np.array(matrix)
+            son = chromosome(m)
+            son.fitness = fitness(son)
+            population.append(son)
+            
+        # new popolation generation
+            new_dim = sub_dim + sub_dim // 2
+            new_population = list()
+            for i in range(0, new_dim):
+                chrom = best_fitness(population)
+                new_population.append(chrom)
+                population.remove(chrom)
+            population.clear()
+            population = new_population
+            
+        # mutation
+        for i in range(0, len(population)):
+            num = randint(1, 100)
+            chrom = population[i]
+            if (num <= 20):
+                for j in range(0,9):
+                    col = randint(0,8)
+                    value = randint(1,9)
+                    chrom.matrix[j][col] = value
+
+        prevfit = bestfit
+        print(sub_dim, len(population))
     
     return result
 
@@ -139,7 +180,7 @@ def main ():
     
     
     solution = genetic_algorithm(matrix1)
-    #print(solution)
+    print(solution)
     
     return
     
