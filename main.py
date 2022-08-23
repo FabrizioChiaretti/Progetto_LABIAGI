@@ -11,7 +11,7 @@ class chromosome:
         self.fitness = None
         
 
-def best_fitness(population):
+def best_fitness_left(population):
     result = None
     best_fitness = 800
     n = len(population)
@@ -24,6 +24,18 @@ def best_fitness(population):
     
     return result
 
+def best_fitness_right(population):
+    result = None
+    best_fitness = 800
+    n = len(population)
+       
+    for i in range(n-1, -1, -1):
+        chrom = population[i]
+        if chrom.fitness < best_fitness:
+             best_fitness = chrom.fitness
+             result = chrom
+    
+    return result
 
 def fitness(chrom):
     
@@ -84,15 +96,15 @@ def genetic_algorithm(mat):
         chrom.fitness = fitness(chrom)
         population.append(chrom)  
     
-    c = best_fitness(population)
+    c = best_fitness_left(population)
     prevfit = c.fitness
     cnt = 0
     
     while (cnt < 500):
         
-        print('iteration: ', cnt)
+        print('Iteration: ', cnt)
         # stopping criterion
-        result = best_fitness(population)
+        result = best_fitness_left(population)
         bestfit = result.fitness
         print('population_dim: ', len(population))
         print('update: ', prevfit - bestfit)
@@ -108,7 +120,10 @@ def genetic_algorithm(mat):
             sub_dim += 1
         
         for i in range(0, sub_dim):
-            best = best_fitness(population)
+            if i % 2:
+                best = best_fitness_left(population)
+            else:
+                best = best_fitness_right(population)
             sub.append(best)
             population.remove(best)
     
@@ -120,7 +135,7 @@ def genetic_algorithm(mat):
             sub.remove(sub[num1])
             num2 = randint(0, len(sub)-1)
             parent2 = sub[num2]
-            population.append(sub[num2])
+            population.insert(0, sub[num2])
             sub.remove(sub[num2])
             matrix = []
             for i in range(0,3):
@@ -140,18 +155,21 @@ def genetic_algorithm(mat):
             m = np.array(matrix)
             son = chromosome(m)
             son.fitness = fitness(son)
-            population.append(son)
+            if (i % 2):
+                population.append(son)
+            else:
+                population.insert(0, son)
             
         population_dim = len(population)
          
         # new popolation
-        best = best_fitness(population)
         population_dim -= (sub_dim // 2)
-        #if best.fitness < bestfit:
-            #population_dim -= 1
         new_population = list()
         for i in range(0, population_dim):
-            chrom = best_fitness(population)
+            if i % 2: 
+                chrom = best_fitness_left(population)
+            else:
+                chrom = best_fitness_right(population)
             new_population.append(chrom)
             population.remove(chrom)
 
@@ -203,7 +221,7 @@ def genetic_algorithm(mat):
         cnt += 1
         #sleep(1)
     
-    print('genetic algorithm finished')
+    print('Genetic algorithm finished')
     fit = result.fitness
     cnt = 0
     for c in population:
@@ -216,15 +234,15 @@ def genetic_algorithm(mat):
 
 def main ():
     
-    matrix1 =  np.array([[7,2,0,3,0,0,0,0,0], # OK
-                        [6,0,8,0,0,0,5,1,0],
-                        [0,0,0,0,1,0,2,0,6],
-                        [3,8,9,0,7,1,6,0,4],
-                        [0,1,6,0,9,2,7,3,5],
-                        [0,0,0,0,3,4,0,8,0],
-                        [0,0,0,0,6,0,0,5,0],
-                        [2,0,3,1,0,0,0,0,7],
-                        [0,6,4,7,8,0,0,0,0]], np.int32)
+    matrix1 =  np.array([[0,6,5,2,0,8,1,4,7], # OK
+                        [0,2,1,0,7,0,0,0,0],
+                        [0,3,4,9,1,5,0,8,6],
+                        [6,0,0,5,0,0,3,1,0],
+                        [5,0,7,0,0,0,0,2,8],
+                        [0,0,8,0,9,0,0,0,0],
+                        [1,8,9,0,0,0,0,0,3],
+                        [0,0,0,0,6,9,8,7,2],
+                        [0,0,6,8,0,3,0,0,0]], np.int32)
     
     matrix2 =  np.array([[4,6,0,1,0,0,0,0,2], # OK
                         [3,0,0,2,7,0,4,0,0],
@@ -244,19 +262,20 @@ def main ():
                         [0,0,0,7,0,0,8,0,0],
                         [0,3,0,0,0,0,0,5,0],
                         [2,0,0,0,7,8,4,0,0],
-                        [7,9,8,5,0,6,2,1,0]], np.int32)
+                        [7,9,8,5,0,6,2,1,0]], np.int32) 
+    
     
     fit = 1000
     cnt = 0
     while fit != 0:
         cnt += 1
-        print('Tentativo numero: ', cnt)
+        print('Attempt number ', cnt)
         sleep(2)
-        solution = genetic_algorithm(matrix3)
+        solution = genetic_algorithm(matrix1)
         fit = solution.fitness
 
     print(solution.matrix)
-    print('Soluzione trovata in ', cnt, ' tentativi')
+    print('Solution found in', cnt, ' attempts')
     
     return
     
