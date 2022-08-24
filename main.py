@@ -2,6 +2,8 @@
 import numpy as np
 from random import randint
 from time import sleep
+import cv2 
+import glob
 
 
 class chromosome:
@@ -234,6 +236,24 @@ def genetic_algorithm(mat):
 
 def main ():
     
+
+    for img in glob.glob("Sudoku/Mat1/matrix.jpg"):
+        gray_img = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
+        
+    cv2.imshow("grey_image", gray_img)
+    cv2.waitKey(0)
+    ret,img_thresh = cv2.threshold(gray_img,127,255,cv2.THRESH_TOZERO)
+    cv2.imshow("img_thresh", img_thresh)
+    cv2.waitKey(0)
+    blur_img = cv2.GaussianBlur(img_thresh, (3,3), 0)
+    kernel = np.ones((5, 5), np.uint8)
+    image = cv2.erode(blur_img, kernel) 
+    cv2.imshow("blur_img", image)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
+    
+    
     matrix1 =  np.array([[0,6,5,2,0,8,1,4,7], # OK
                         [0,2,1,0,7,0,0,0,0],
                         [0,3,4,9,1,5,0,8,6],
@@ -267,15 +287,15 @@ def main ():
     
     fit = 1000
     cnt = 0
-    while fit != 0:
-        cnt += 1
-        print('Attempt number ', cnt)
-        sleep(2)
-        solution = genetic_algorithm(matrix1)
-        fit = solution.fitness
+   # while fit != 0:
+        #cnt += 1
+        #print('Attempt number ', cnt)
+        #sleep(2)
+        #solution = genetic_algorithm(matrix1)
+        #fit = solution.fitness
 
-    print(solution.matrix)
-    print('Solution found in', cnt, ' attempts')
+    #print(solution.matrix)
+    #print('Solution found in', cnt, ' attempts')
     
     return
     
