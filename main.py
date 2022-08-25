@@ -1,10 +1,11 @@
 
+from tkinter import Image
 import numpy as np
 from random import randint
 from time import sleep
 import cv2 
 import glob
-
+import pytesseract
 
 class chromosome:
     
@@ -237,21 +238,34 @@ def genetic_algorithm(mat):
 def main ():
     
 
-    for img in glob.glob("Sudoku/Mat1/matrix.jpg"):
-        gray_img = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
-        
-    cv2.imshow("grey_image", gray_img)
-    cv2.waitKey(0)
-    ret,img_thresh = cv2.threshold(gray_img,127,255,cv2.THRESH_TOZERO)
-    cv2.imshow("img_thresh", img_thresh)
-    cv2.waitKey(0)
-    blur_img = cv2.GaussianBlur(img_thresh, (3,3), 0)
-    kernel = np.ones((5, 5), np.uint8)
-    image = cv2.erode(blur_img, kernel) 
-    cv2.imshow("blur_img", image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    for img in glob.glob("Sudoku/Mat1/matrix1.jpg"): #"Sudoku/Mat1/matrix.jpg" 
+        image = cv2.imread(img, cv2.COLOR_BGR2HSV)
     
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)   
+    cv2.imshow("gray image", image)
+    cv2.waitKey(0)
+    #ret,image = cv2.threshold(image,127,255,cv2.THRESH_TOZERO)
+    #cv2.imshow("image thresh", image)
+    #cv2.waitKey(0)
+    roi = cv2.selectROI(image)
+    print(roi)
+    roi_cropped = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
+    cv2.imshow("roi cropped", roi_cropped)
+    cv2.waitKey(0)
+    sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+    sharpen = cv2.filter2D(roi_cropped, -1, sharpen_kernel)
+    cv2.imshow('sharpen', sharpen)
+    cv2.waitKey()
+    #image = cv2.GaussianBlur(img_thresh, (3,3), 0)
+    #kernel = np.ones((5, 5), np.uint8)
+    #image = cv2.erode(blur_img, kernel) 
+    #cv2.imshow("blur_img", image)
+    #cv2.waitKey(0)
+    text = pytesseract.image_to_string(sharpen)
+    print(text)
+    cv2.destroyAllWindows()
     
     
     matrix1 =  np.array([[0,6,5,2,0,8,1,4,7], # OK
