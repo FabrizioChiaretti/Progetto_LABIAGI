@@ -241,16 +241,16 @@ def main ():
     cv2.resizeWindow("image", 700, 700)
     
     for img in glob.glob("Sudoku/Mat1/matrix1.jpg"): #"Sudoku/Mat1/matrix.jpg" 
-        image = cv2.imread(img, cv2.IMREAD_COLOR)
+        image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0)
-    
     ret,image = cv2.threshold(image, 210, 255, cv2.THRESH_BINARY)
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    
+    #image = cv2.GaussianBlur(image,(5,5),0)
     #cv2.imshow("image", image)
     #cv2.waitKey(0)
     
@@ -259,20 +259,49 @@ def main ():
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
-    ROI_number = 0
-    for i in range(len(cnts)):
-        if (i % 2 == 0):
-            cnt = cnts[i]
-            x,y,w,h = cv2.boundingRect(cnt)
-            ROI = image[y:y+h, x:x+w]
-            cv2.imshow("ROI", ROI)
-            cv2.waitKey(0)
-            ROI_number += 1
-
-    print(ROI_number) #dovrebbe essere uguale a 9x9=81, invece è uguale a 79
+    #image = cv2.Laplacian(image,cv2.CV_32F)
+    #cv2.imshow("image", image)
+    #cv2.waitKey(0)
     
-    #laplacian = cv2.Laplacian(image,cv2.CV_64F)
-    #cv2.imshow("laplacian image", laplacian)
+    kernel = np.ones((5,5),np.uint8)
+    image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    
+    roi = cv2.selectROI(image)
+    roi_cropped = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
+    cv2.imshow("roi", roi_cropped)
+    cv2.waitKey(0)
+    
+    #roi_number = 0
+    #for idx in range(len(cnts)):
+        #roi_number += 1
+        #x, y, w, h = cv2.boundingRect(cnts[idx])
+        #roi = image[y:y+h, x:x+w]
+        #cv2.imshow("image", roi)
+        #cv2.waitKey(0)
+    #print(roi_number)   
+    
+    #ROI_number = 0
+    #for i in range(len(cnts)):
+        #if (i % 2 == 0):
+            #cnt = cnts[i]
+            #x,y,w,h = cv2.boundingRect(cnt)
+            #ROI = image[y:y+h, x:x+w]
+            #cv2.imshow("ROI", ROI)
+            #cv2.waitKey(0)
+            #ROI_number += 1
+
+    #print(ROI_number) #dovrebbe essere uguale a 9x9=81, invece è uguale a 79
+    
+    #image = cv2.Canny(image,100,200)
+    #cv2.imshow("image", image)
+    #cv2.waitKey(0) 
+    #image = cv2.GaussianBlur(image,(5,5),0)
+    #cv2.imshow("image", image)
+    #cv2.waitKey(0)
+    #image = cv2.Laplacian(image,cv2.CV_64F)
+    #cv2.imshow("image", image)
     #cv2.waitKey(0)
     #roi = cv2.selectROI(image)
     #roi_cropped = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
