@@ -1,11 +1,11 @@
 
-from tkinter import Image
 import numpy as np
 from random import randint
 from time import sleep
 import cv2 
 import glob
-import pytesseract
+import tensorflow as tf
+
 
 class chromosome:
     
@@ -13,6 +13,7 @@ class chromosome:
         self.matrix = np.copy(mat)
         self.fitness = None
         
+
 
 def best_fitness_left(population):
     result = None
@@ -27,6 +28,8 @@ def best_fitness_left(population):
     
     return result
 
+
+
 def best_fitness_right(population):
     result = None
     best_fitness = 800
@@ -39,6 +42,8 @@ def best_fitness_right(population):
              result = chrom
     
     return result
+
+
 
 def fitness(chrom):
     
@@ -58,6 +63,7 @@ def fitness(chrom):
     return value
 
 
+
 def check_grid(matrix, value_list, i, j):
     
     for r in range(i, i+3):
@@ -66,6 +72,7 @@ def check_grid(matrix, value_list, i, j):
                 value_list.remove(matrix[r][c])
     
     return
+
 
 
 def genetic_algorithm(mat):
@@ -235,130 +242,95 @@ def genetic_algorithm(mat):
     return result
 
 
+
 def main ():
+    
+    mnist = tf.keras.datasets.mnist
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train = tf.keras.utils.normalize(x_train, axis = 1)
+    x_test = tf.keras.utils.normalize(x_test, axis = 1)
+    
+    # create a sequential neural network
+    model = tf.keras.models.Sequential() 
+    # add layers to model
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    model.add(tf.keras.layers.Dense(10, activation = 'softmax'))
+    
+    model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+    
+    model.fit(x_train, y_train, epochs = 3)
+    model.save('Digits.model')
+    
+    model = tf.keras.models.load_model('Digits.model')
+    loss, accuracy = model.evaluate(x_test, y_test)
+    print('loss: ', loss, 'accuracy: ', accuracy)
     
     cv2.namedWindow("image", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("image", 700, 700)
     
-    for img in glob.glob("Sudoku/Mat1/matrix1.jpg"): #"Sudoku/Mat1/matrix.jpg" 
+    for img in glob.glob("Sudoku/Mat2/matrix.jpg"): 
         image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
     ret,image = cv2.threshold(image, 210, 255, cv2.THRESH_BINARY)
-    cv2.imshow("image", image)
-    cv2.waitKey(0)
-    
-    #image = cv2.GaussianBlur(image,(5,5),0)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0)
     
     cnts, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(image, cnts, -1, (0,255,0), 3)
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
-    #image = cv2.Laplacian(image,cv2.CV_32F)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0)
-    
     kernel = np.ones((5,5),np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
-    roi = cv2.selectROI(image)
-    roi_cropped = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
-    cv2.imshow("roi", roi_cropped)
+    x, y, w, h = cv2.boundingRect(cnts[1])
+    matrix = image[y:y+h, x:x+w]
+    cv2.imshow("image", matrix)
     cv2.waitKey(0)
     
-    #roi_number = 0
-    #for idx in range(len(cnts)):
-        #roi_number += 1
-        #x, y, w, h = cv2.boundingRect(cnts[idx])
-        #roi = image[y:y+h, x:x+w]
-        #cv2.imshow("image", roi)
-        #cv2.waitKey(0)
-    #print(roi_number)   
-    
-    #ROI_number = 0
-    #for i in range(len(cnts)):
-        #if (i % 2 == 0):
-            #cnt = cnts[i]
-            #x,y,w,h = cv2.boundingRect(cnt)
-            #ROI = image[y:y+h, x:x+w]
-            #cv2.imshow("ROI", ROI)
-            #cv2.waitKey(0)
-            #ROI_number += 1
-
-    #print(ROI_number) #dovrebbe essere uguale a 9x9=81, invece è uguale a 79
-    
-    #image = cv2.Canny(image,100,200)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0) 
-    #image = cv2.GaussianBlur(image,(5,5),0)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0)
-    #image = cv2.Laplacian(image,cv2.CV_64F)
-    #cv2.imshow("image", image)
-    #cv2.waitKey(0)
-    #roi = cv2.selectROI(image)
-    #roi_cropped = image[int(roi[1]):int(roi[1]+roi[3]), int(roi[0]):int(roi[0]+roi[2])]
-    #cv2.imshow("roi cropped", roi_cropped)
-    #cv2.waitKey(0)
-    #sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    #sharpen = cv2.filter2D(roi_cropped, -1, sharpen_kernel)
-    #cv2.imshow('sharpen', sharpen)
-    #cv2.waitKey()
-    #image = cv2.GaussianBlur(img_thresh, (3,3), 0)
-    #kernel = np.ones((5, 5), np.uint8)
-    #image = cv2.erode(blur_img, kernel) 
-    #cv2.imshow("blur_img", image)
-    #cv2.waitKey(0)
-    #text = pytesseract.image_to_string(sharpen)
-    #print(text)
-    cv2.destroyAllWindows()
-    
-    
-    matrix1 =  np.array([[0,6,5,2,0,8,1,4,7], # OK
-                        [0,2,1,0,7,0,0,0,0],
-                        [0,3,4,9,1,5,0,8,6],
-                        [6,0,0,5,0,0,3,1,0],
-                        [5,0,7,0,0,0,0,2,8],
-                        [0,0,8,0,9,0,0,0,0],
-                        [1,8,9,0,0,0,0,0,3],
-                        [0,0,0,0,6,9,8,7,2],
-                        [0,0,6,8,0,3,0,0,0]], np.int32)
-    
-    matrix2 =  np.array([[4,6,0,1,0,0,0,0,2], # OK
-                        [3,0,0,2,7,0,4,0,0],
-                        [2,8,0,9,0,0,0,0,6],
-                        [0,9,2,5,1,0,8,7,0],
-                        [0,1,0,0,6,0,0,2,0],
-                        [0,0,4,0,0,9,0,0,0],
-                        [9,0,0,7,5,1,0,3,0],
-                        [1,0,8,6,0,3,0,0,0],
-                        [5,7,3,0,0,0,6,9,1]], np.int32)
-    
-    matrix3 =  np.array([[6,0,5,1,8,9,0,2,4], # OK
-                        [0,1,0,0,0,0,0,8,6],
-                        [3,8,2,4,0,5,0,9,7],
-                        [0,4,3,0,5,1,0,0,0],
-                        [5,0,7,8,9,0,0,4,0],
-                        [0,0,0,7,0,0,8,0,0],
-                        [0,3,0,0,0,0,0,5,0],
-                        [2,0,0,0,7,8,4,0,0],
-                        [7,9,8,5,0,6,2,1,0]], np.int32) 
-    
-    
-    fit = 1000
+    dimensions = matrix.shape
     cnt = 0
-   # while fit != 0:
+    w = h = dimensions[0] // 9
+    
+    mat = [[0 for i in range(0,9)] for j in range(0,9)]
+    
+    for y in range(0, 9):
+        y1 = y*h
+        for x in range(0, 9):
+            x1 = x*w
+            cell = matrix[y1:y1+h, x1:x1+w]
+            cv2.imshow("image", cell)
+            cv2.waitKey(0)
+            img = cv2.resize(cell, (28,28))
+            prediction = model.predict(img)
+            print(prediction)
+            mat[y][x] = prediction
+            cnt += 1
+            
+    cv2.destroyAllWindows()
+            
+    if (cnt != 81):
+        print("I did not recognise cells or numbers, try again")
+        return 
+    
+    else:
+        print("Matrix detection completed")
+    
+    sudoku_matrix = np.array(mat, dtype = np.int32)
+    print(sudoku_matrix)
+    
+    #fit = 1
+    #cnt = 0
+    #while fit != 0:
         #cnt += 1
         #print('Attempt number ', cnt)
         #sleep(2)
-        #solution = genetic_algorithm(matrix1)
+        #solution = genetic_algorithm(sudoku_matrix)
         #fit = solution.fitness
 
     #print(solution.matrix)
