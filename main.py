@@ -251,17 +251,17 @@ def main ():
     x_test = tf.keras.utils.normalize(x_test, axis = 1)
     
     # create a sequential neural network
-    model = tf.keras.models.Sequential() 
+    #model = tf.keras.models.Sequential() 
     # add layers to model
-    model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(128, activation = 'relu'))
-    model.add(tf.keras.layers.Dense(128, activation = 'relu'))
-    model.add(tf.keras.layers.Dense(10, activation = 'softmax'))
+    #model.add(tf.keras.layers.Flatten(input_shape = (28,28)))
+    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    #model.add(tf.keras.layers.Dense(10, activation = 'softmax'))
     
-    model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+    #model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
     
-    model.fit(x_train, y_train, epochs = 3)
-    model.save('Digits.model')
+    #model.fit(x_train, y_train, epochs = 3)
+    #model.save('Digits.model')
     
     model = tf.keras.models.load_model('Digits.model')
     loss, accuracy = model.evaluate(x_test, y_test)
@@ -279,7 +279,7 @@ def main ():
     ret,image = cv2.threshold(image, 210, 255, cv2.THRESH_BINARY)
     
     cnts, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(image, cnts, -1, (0,255,0), 3)
+    #cv2.drawContours(image, cnts, -1, (0,255,0), 3)
     cv2.imshow("image", image)
     cv2.waitKey(0)
     
@@ -306,10 +306,18 @@ def main ():
             cell = matrix[y1:y1+h, x1:x1+w]
             cv2.imshow("image", cell)
             cv2.waitKey(0)
-            img = cv2.resize(cell, (28,28))
+            cell = cv2.resize(cell, (28,28))
+            cv2.imshow("image", cell)
+            cv2.waitKey(0)
+            sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+            sharpen = cv2.filter2D(cell, -1, sharpen_kernel)
+            cv2.imshow('image', sharpen)
+            cv2.waitKey()
+            img = np.array([cell])
+            img = np.invert(img)
             prediction = model.predict(img)
-            print(prediction)
-            mat[y][x] = prediction
+            print('number detected: ', np.argmax(prediction))
+            mat[y][x] = np.argmax(prediction)
             cnt += 1
             
     cv2.destroyAllWindows()
