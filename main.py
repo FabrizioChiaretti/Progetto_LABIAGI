@@ -1,10 +1,11 @@
 
 import numpy as np
-from random import randint
-from time import sleep
 import cv2 
 import glob
-import tensorflow as tf
+import pytesseract
+from random import randint
+from time import sleep
+
 
 
 class chromosome:
@@ -245,52 +246,30 @@ def genetic_algorithm(mat):
 
 def main ():
     
-    mnist = tf.keras.datasets.mnist
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train = tf.keras.utils.normalize(x_train, axis = 1)
-    x_test = tf.keras.utils.normalize(x_test, axis = 1)
-    
-    # create a sequential neural network
-    #model = tf.keras.models.Sequential() 
-    # add layers to model
-    #model.add(tf.keras.layers.Flatten(input_shape = (28,28)))
-    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
-    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
-    #model.add(tf.keras.layers.Dense(10, activation = 'softmax'))
-    
-    #model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
-    
-    #model.fit(x_train, y_train, epochs = 3)
-    #model.save('Digits.model')
-    
-    model = tf.keras.models.load_model('Digits.model')
-    loss, accuracy = model.evaluate(x_test, y_test)
-    print('loss: ', loss, 'accuracy: ', accuracy)
-    
-    cv2.namedWindow("image", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("image", 700, 700)
+    cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Image", 700, 700)
     
     for img in glob.glob("Sudoku/Mat2/matrix.jpg"): 
         image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
-    cv2.imshow("image", image)
+    cv2.imshow("Image", image)
     cv2.waitKey(0)
     
     ret,image = cv2.threshold(image, 210, 255, cv2.THRESH_BINARY)
     
     cnts, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #cv2.drawContours(image, cnts, -1, (0,255,0), 3)
-    cv2.imshow("image", image)
+    cv2.imshow("Image", image)
     cv2.waitKey(0)
     
     kernel = np.ones((5,5),np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
-    cv2.imshow("image", image)
+    cv2.imshow("Image", image)
     cv2.waitKey(0)
     
     x, y, w, h = cv2.boundingRect(cnts[1])
     matrix = image[y:y+h, x:x+w]
-    cv2.imshow("image", matrix)
+    cv2.imshow("Image", matrix)
     cv2.waitKey(0)
     
     dimensions = matrix.shape
@@ -303,21 +282,14 @@ def main ():
         y1 = y*h
         for x in range(0, 9):
             x1 = x*w
-            cell = matrix[y1:y1+h, x1:x1+w]
-            cv2.imshow("image", cell)
-            cv2.waitKey(0)
-            cell = cv2.resize(cell, (28,28))
-            cv2.imshow("image", cell)
-            cv2.waitKey(0)
-            sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-            sharpen = cv2.filter2D(cell, -1, sharpen_kernel)
-            cv2.imshow('image', sharpen)
-            cv2.waitKey()
-            img = np.array([cell])
-            img = np.invert(img)
-            prediction = model.predict(img)
-            print('number detected: ', np.argmax(prediction))
-            mat[y][x] = np.argmax(prediction)
+            cell = matrix[y1+10:y1+h-10, x1+10:x1+w-10]
+            #cv2.imshow("Image", cell)
+            #cv2.waitKey(0)
+            custom_config = r'--oem 3 --psm 6 outputbase digits'
+            n = pytesseract.image_to_string(cell, config = custom_config).split()
+            if len(n) > 0 :
+                print(n[0])
+                mat[y][x] = int(n[0])
             cnt += 1
             
     cv2.destroyAllWindows()
@@ -332,17 +304,17 @@ def main ():
     sudoku_matrix = np.array(mat, dtype = np.int32)
     print(sudoku_matrix)
     
-    #fit = 1
-    #cnt = 0
-    #while fit != 0:
-        #cnt += 1
-        #print('Attempt number ', cnt)
-        #sleep(2)
-        #solution = genetic_algorithm(sudoku_matrix)
-        #fit = solution.fitness
+    fit = 1
+    cnt = 0
+    while fit != 0:
+        cnt += 1
+        print(f'Attempt number {cnt}')
+        sleep(2)
+        solution = genetic_algorithm(sudoku_matrix)
+        fit = solution.fitness
 
-    #print(solution.matrix)
-    #print('Solution found in', cnt, ' attempts')
+    print(solution.matrix)
+    print(f'Solution found in {cnt} attempts')
     
     return
     

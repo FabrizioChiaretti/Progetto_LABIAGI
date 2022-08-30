@@ -4,7 +4,8 @@ from random import randint
 import cv2
 import glob
 import pandas as pd
-
+import pytesseract
+import tensorflow as tf
 
 def main():
     
@@ -21,8 +22,6 @@ def main():
     
     cnts, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #cv2.drawContours(image, cnts, -1, (0,255,0), 3)
-    cv2.imshow("image", image)
-    cv2.waitKey(0)
     
     kernel = np.ones((5,5),np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
@@ -44,16 +43,16 @@ def main():
         y1 = y*h
         for x in range(0, 9):
             x1 = x*w
-            cell = matrix[y1:y1+h, x1:x1+w]
+            cell = matrix[y1+10:y1+h-10, x1+10:x1+w-10]
             cv2.imshow("image", cell)
             cv2.waitKey(0)
-            cell = cv2.resize(cell, (28,28))
-            cv2.imshow("image", cell)
-            cv2.waitKey(0)
-            sharpen_kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-            sharpen = cv2.filter2D(cell, -1, sharpen_kernel)
-            cv2.imshow('image', sharpen)
-            cv2.waitKey()
+            custom_config = r'--oem 3 --psm 6 outputbase digits'
+            n = pytesseract.image_to_string(cell, config = custom_config).split()
+            if len(n) > 0 :
+                print(n[0])
+                mat[y][x] = int(n[0])
+            else:
+                mat[y][x] = 0
             cnt += 1
             
     cv2.destroyAllWindows()
@@ -67,6 +66,28 @@ def main():
         
     sudoku_matrix = np.array(mat, dtype = np.int32)
     print(sudoku_matrix)
+    
+    mnist = tf.keras.datasets.mnist
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    x_train = tf.keras.utils.normalize(x_train, axis = 1)
+    x_test = tf.keras.utils.normalize(x_test, axis = 1)
+    
+    # create a sequential neural network
+    #model = tf.keras.models.Sequential() 
+    # add layers to model
+    #model.add(tf.keras.layers.Flatten(input_shape = (28,28)))
+    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    #model.add(tf.keras.layers.Dense(128, activation = 'relu'))
+    #model.add(tf.keras.layers.Dense(10, activation = 'softmax'))
+    
+    #model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
+    
+    #model.fit(x_train, y_train, epochs = 3)
+    #model.save('Digits.model')
+    
+    model = tf.keras.models.load_model('Digits.model')
+    loss, accuracy = model.evaluate(x_test, y_test)
+    print('loss: ', loss, 'accuracy: ', accuracy)
     
     #image = cv2.GaussianBlur(image,(5,5),0)
     #cv2.imshow("image", image)
