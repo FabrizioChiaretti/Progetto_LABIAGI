@@ -113,12 +113,14 @@ def genetic_algorithm(mat):
     while (cnt < 500):
         
         print('Iteration: ', cnt)
-        # stopping criterion
+    
         result = best_fitness_left(population)
         bestfit = result.fitness
         print('population_dim: ', len(population))
         print('update: ', prevfit - bestfit)
         print('best fitness: ', bestfit)
+            
+        # stopping criterion
         if result.fitness == 0:
             print('Solution found')
             break
@@ -230,6 +232,7 @@ def genetic_algorithm(mat):
         prevfit = bestfit
         cnt += 1
         #sleep(1)
+        
     
     print('Genetic algorithm finished')
     fit = result.fitness

@@ -76,6 +76,16 @@ def check_grid(matrix, value_list, i, j):
     return
 
 
+def number_best_chrom(fit, population):
+    
+    result = 0
+    for i in range(0, len(population)):
+        if population[i].fitness == fit:
+            result += 1
+    
+    return result
+
+
 
 def genetic_algorithm(mat):
     
@@ -121,6 +131,11 @@ def genetic_algorithm(mat):
         print('population_dim: ', len(population))
         print('update: ', prevfit - bestfit)
         print('best fitness: ', bestfit)
+        n = 0
+        for k in range(0, len(population)):
+            if population[k].fitness == result.fitness:
+                n += 1
+        print(f"number best chrom: {n}")
         if result.fitness == 0:
             print('Solution found')
             break
@@ -131,13 +146,24 @@ def genetic_algorithm(mat):
         if sub_dim % 2:
             sub_dim += 1
         
-        for i in range(0, sub_dim):
-            if i % 2:
+        #n = number_best_chrom(result.fitness, population)
+        if result.fitness <= 8 and n > sub_dim:
+            aux = []
+            for i in range(0, len(population)):
+                if population[i].fitness == result.fitness:
+                    aux.append(population[i])
+                    
+            for j in range(0, sub_dim):
+                num = randint(0, len(aux)-1)
+                sub.append(aux[num])
+                population.remove(aux[num])
+                aux.remove(aux[num])
+            
+        else :
+            for i in range(0, sub_dim):
                 best = best_fitness_left(population)
-            else:
-                best = best_fitness_right(population)
-            sub.append(best)
-            population.remove(best)
+                sub.append(best)
+                population.remove(best)
     
         # crossover
         for i in range(0, len(sub) // 2):
@@ -173,17 +199,31 @@ def genetic_algorithm(mat):
                 population.insert(0, son)
             
         population_dim = len(population)
+        
+        c = best_fitness_left(population)
+        fit = c.fitness
+        num = number_best_chrom(fit, population)
          
         # new popolation
-        population_dim -= (sub_dim // 2)
         new_population = list()
-        for i in range(0, population_dim):
-            if i % 2: 
+        population_dim -= (sub_dim // 2)
+        
+        if num > population_dim:
+            aux = []
+            for i in range(0, len(population)):
+                if population[i].fitness == fit:
+                    aux.append(population[i])
+          
+            for j in range(0, population_dim):
+                num = randint(0, len(aux)-1)
+                new_population.append(aux[num])
+                aux.remove(aux[num])
+         
+        else:   
+            for i in range(0, population_dim):
                 chrom = best_fitness_left(population)
-            else:
-                chrom = best_fitness_right(population)
-            new_population.append(chrom)
-            population.remove(chrom)
+                new_population.append(chrom)
+                population.remove(chrom)
 
         population = new_population
             
@@ -335,7 +375,7 @@ def main():
     cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Image", 700, 700)
     
-    for img in glob.glob("Sudoku/Mat2/matrix.jpg"): 
+    for img in glob.glob("Sudoku/Mat4/matrix.jpg"): 
         image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
     cv2.imshow("Image", image)
@@ -371,8 +411,8 @@ def main():
         for x in range(0, 9):
             x1 = x*w
             cell = matrix[y1+10:y1+h-10, x1+10:x1+w-10]
-            #cv2.imshow("Image", cell)
-            #cv2.waitKey(0)
+            cv2.imshow("Image", cell)
+            cv2.waitKey(0)
             custom_config = r'--oem 3 --psm 6 outputbase digits'
             n = pytesseract.image_to_string(cell, config = custom_config).split()
             if len(n) > 0 :

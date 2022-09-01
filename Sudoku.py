@@ -14,7 +14,7 @@ def main ():
     cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Image", 700, 700)
     
-    for img in glob.glob("Sudoku/Mat3/matrix.jpg"): 
+    for img in glob.glob("Sudoku/Mat4/matrix.jpg"): 
         image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
     cv2.imshow("Image", image)
