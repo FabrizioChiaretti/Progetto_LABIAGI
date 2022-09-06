@@ -15,27 +15,12 @@ class chromosome:
         
 
 
-def best_fitness_left(population):
+def best_fitness(population):
     result = None
     best_fitness = 800
     n = len(population)
     
     for i in range(0, n):
-        chrom = population[i]
-        if chrom.fitness < best_fitness:
-             best_fitness = chrom.fitness
-             result = chrom
-    
-    return result
-
-
-
-def best_fitness_right(population):
-    result = None
-    best_fitness = 800
-    n = len(population)
-       
-    for i in range(n-1, -1, -1):
         chrom = population[i]
         if chrom.fitness < best_fitness:
              best_fitness = chrom.fitness
@@ -75,6 +60,17 @@ def check_grid(matrix, value_list, i, j):
 
 
 
+def number_best_chrom(fit, population):
+    
+    result = 0
+    for i in range(0, len(population)):
+        if population[i].fitness == fit:
+            result += 1
+    
+    return result
+
+
+
 def genetic_algorithm(mat):
     
     print('Genetic algorithm starts')
@@ -106,21 +102,24 @@ def genetic_algorithm(mat):
         chrom.fitness = fitness(chrom)
         population.append(chrom)  
     
-    c = best_fitness_left(population)
+    c = best_fitness(population)
     prevfit = c.fitness
     cnt = 0
     
-    while (cnt < 500):
+    while (cnt < 300):
         
         print('Iteration: ', cnt)
-    
-        result = best_fitness_left(population)
+        
+        # stopping criterion
+        result = best_fitness(population)
         bestfit = result.fitness
-        print('population_dim: ', len(population))
         print('update: ', prevfit - bestfit)
         print('best fitness: ', bestfit)
-            
-        # stopping criterion
+        n = 0
+        for k in range(0, len(population)):
+            if population[k].fitness == result.fitness:
+                n += 1
+        print(f"number best chrom: {n}")
         if result.fitness == 0:
             print('Solution found')
             break
@@ -131,13 +130,24 @@ def genetic_algorithm(mat):
         if sub_dim % 2:
             sub_dim += 1
         
-        for i in range(0, sub_dim):
-            if i % 2:
-                best = best_fitness_left(population)
-            else:
-                best = best_fitness_right(population)
-            sub.append(best)
-            population.remove(best)
+        #n = number_best_chrom(result.fitness, population)
+        if result.fitness <= 8 and n > sub_dim:
+            aux = []
+            for i in range(0, len(population)):
+                if population[i].fitness == result.fitness:
+                    aux.append(population[i])
+                    
+            for j in range(0, sub_dim):
+                num = randint(0, len(aux)-1)
+                sub.append(aux[num])
+                population.remove(aux[num])
+                aux.remove(aux[num])
+            
+        else :
+            for i in range(0, sub_dim):
+                best = best_fitness(population)
+                sub.append(best)
+                population.remove(best)
     
         # crossover
         for i in range(0, len(sub) // 2):
@@ -173,17 +183,31 @@ def genetic_algorithm(mat):
                 population.insert(0, son)
             
         population_dim = len(population)
+        
+        c = best_fitness(population)
+        fit = c.fitness
+        num = number_best_chrom(fit, population)
          
         # new popolation
-        population_dim -= (sub_dim // 2)
         new_population = list()
-        for i in range(0, population_dim):
-            if i % 2: 
-                chrom = best_fitness_left(population)
-            else:
-                chrom = best_fitness_right(population)
-            new_population.append(chrom)
-            population.remove(chrom)
+        population_dim -= (sub_dim // 2)
+        
+        if num > population_dim:
+            aux = []
+            for i in range(0, len(population)):
+                if population[i].fitness == fit:
+                    aux.append(population[i])
+          
+            for j in range(0, population_dim):
+                num = randint(0, len(aux)-1)
+                new_population.append(aux[num])
+                aux.remove(aux[num])
+         
+        else:   
+            for i in range(0, population_dim):
+                chrom = best_fitness(population)
+                new_population.append(chrom)
+                population.remove(chrom)
 
         population = new_population
             
@@ -232,9 +256,7 @@ def genetic_algorithm(mat):
         prevfit = bestfit
         cnt += 1
         #sleep(1)
-        
     
-    print('Genetic algorithm finished')
     fit = result.fitness
     cnt = 0
     for c in population:
@@ -242,6 +264,8 @@ def genetic_algorithm(mat):
             cnt += 1
     
     print(cnt)
+    
+    print('Genetic algorithm finished')
     
     return result
 
