@@ -6,7 +6,6 @@ from time import sleep
 
 
 
-
 class chromosome:
     
     def __init__(self, mat):
@@ -88,11 +87,11 @@ def genetic_algorithm(mat):
             check_grid(chrom.matrix, value_list, i, j)
             for r in range(i, i+3):
                 for c in range(j, j+3):
-                  if chrom.matrix[r][c] == 0:
-                    pos = randint(0, len(value_list)-1)
-                    value = value_list[pos]
-                    value_list.remove(value)
-                    chrom.matrix[r][c] = value
+                    if chrom.matrix[r][c] == 0:
+                        pos = randint(0, len(value_list)-1)
+                        value = value_list[pos]
+                        value_list.remove(value)
+                        chrom.matrix[r][c] = value
                     
             j += 3
             if k % 3 == 0:
@@ -103,25 +102,24 @@ def genetic_algorithm(mat):
         population.append(chrom)  
     
     c = best_fitness(population)
-    prevfit = c.fitness
-    cnt = 0
+    prevfit = 0
+    cnt = 1
     
-    while (cnt < 300):
+    while (cnt <= 300):
         
-        print('Iteration: ', cnt)
+        if cnt % 50 == 0 or cnt == 1:
+            print('Iteration: ', cnt)
+        
+        result = best_fitness(population)
+        
+        bestfit = result.fitness
+        update = prevfit - bestfit
+        if update != 0:
+            print('Best fitness: ', bestfit)
         
         # stopping criterion
-        result = best_fitness(population)
-        bestfit = result.fitness
-        print('update: ', prevfit - bestfit)
-        print('best fitness: ', bestfit)
-        n = 0
-        for k in range(0, len(population)):
-            if population[k].fitness == result.fitness:
-                n += 1
-        print(f"number best chrom: {n}")
-        if result.fitness == 0:
-            print('Solution found')
+        if bestfit == 0:
+            print(f"Solution found in {cnt} iterations")
             break
         
         # selection
@@ -130,7 +128,7 @@ def genetic_algorithm(mat):
         if sub_dim % 2:
             sub_dim += 1
         
-        #n = number_best_chrom(result.fitness, population)
+        n = number_best_chrom(bestfit, population)
         if result.fitness <= 8 and n > sub_dim:
             aux = []
             for i in range(0, len(population)):
@@ -256,14 +254,7 @@ def genetic_algorithm(mat):
         prevfit = bestfit
         cnt += 1
         #sleep(1)
-    
-    fit = result.fitness
-    cnt = 0
-    for c in population:
-        if (c.fitness == fit):
-            cnt += 1
-    
-    print(cnt)
+
     
     print('Genetic algorithm finished')
     

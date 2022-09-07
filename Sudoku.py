@@ -14,23 +14,23 @@ def main ():
     cv2.namedWindow("Image", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Image", 700, 700)
     
-    for img in glob.glob("Sudoku/Mat3/matrix.jpg"): 
+    for img in glob.glob("Sudoku/matrix.jpg"): 
         image = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", image)
+    #cv2.waitKey(0)
     
     ret,image = cv2.threshold(image, 210, 255, cv2.THRESH_BINARY)
     
     cnts, hierarchy = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #cv2.drawContours(image, cnts, -1, (0,255,0), 3)
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", image)
+    #cv2.waitKey(0)
     
     kernel = np.ones((5,5),np.uint8)
     image = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
-    cv2.imshow("Image", image)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", image)
+    #cv2.waitKey(0)
     
     x, y, w, h = cv2.boundingRect(cnts[1])
     matrix = image[y:y+h, x:x+w]
@@ -59,7 +59,7 @@ def main ():
     cv2.destroyAllWindows()
             
     if (cnt != 81):
-        print("I did not recognise cells or numbers, try again")
+        print("Cells or numbers did not recognise, try again")
         return 
     
     else:
@@ -86,31 +86,28 @@ def main ():
     cv2.resizeWindow("Image", 700, 700)
     
     sol = None
-    for img in glob.glob("Sudoku/Mat3/solution.jpg"): 
+    for img in glob.glob("Sudoku/solution.jpg"): 
         sol = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
     
     if sol is None:
         print('solution.jpg not found')
         return
-    
-    else:
-        print('solution.jpg found')
         
     print('Checking solution...')
       
     ret,sol = cv2.threshold(sol, 210, 255, cv2.THRESH_BINARY)
-    cv2.imshow("Image", sol)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", sol)
+    #cv2.waitKey(0)
     
     cnts, hierarchy = cv2.findContours(sol, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     #cv2.drawContours(sol, cnts, -1, (0,255,0), 3)
-    cv2.imshow("Image", sol)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", sol)
+    #cv2.waitKey(0)
     
     kernel = np.ones((5,5),np.uint8)
     sol = cv2.morphologyEx(sol, cv2.MORPH_CLOSE, kernel)
-    cv2.imshow("Image", sol)
-    cv2.waitKey(0)
+    #cv2.imshow("Image", sol)
+    #cv2.waitKey(0)
     
     x, y, w, h = cv2.boundingRect(cnts[1])
     sol_matrix = sol[y:y+h, x:x+w]
@@ -139,7 +136,7 @@ def main ():
     cv2.destroyAllWindows()
     
     if (cnt != 81):
-        print("I did not recognise cells or numbers of the solution, try again")
+        print("Cells or numbers of the solution did not recognise, try again")
         return 
     
     else:
