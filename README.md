@@ -1,18 +1,18 @@
 
 # SUDOKU_SOLVER
 
-**SUDOKU_SOLVER** is a tool written in python that solves by genetic algorithm a Sudoku game shown by an image.
+**SUDOKU_SOLVER** is a tool whose purpose is to solve any Sudoku game using *genetic algorithms*.
 
 ## QUICK INSTALL GUIDE
 
-1. Download the project on your local machine;
+1. Download the Github project on your machine;
 2. Download python3 and opencv library on your machine;
-3. Use "python3 Sudoku.py" to launch the program.
+3. Use the command *python3 Sudoku.py* to launch the tool.
 
 ## USER MANUAL
 
-The program searches an image in 'jpg' format in the 'Sudoku' folder to get the grid of the game and after a processing of the image it displays a window to show the result of the processing and it wait until any key is pressed (for example 'enter'). 
-After any keys is pressed the program tries to solve the enigma by genetic algorithm and it searches an image in 'jpg' format to check if it solves the enigma or not. 
-The user can check the 'Sudoku folder' to know names and types of the images. 
+The "Sudoku" folder contains two images: "input.jpg" is the input of the tool while "solution.jpg" contains a solution to the game.
+When launched, at first the program searches for the image "input.jpg". The tool processes that image to get the grid of the game and when finished it shows the result to the user, waiting until any key is pressed. 
+When the user inputs a key, genetic algorithm starts solving the enigma finding a possible solution. When it finishes, it is necessary to asses that the output of the algorithm is effectively a solution to the game. Hence, using an image processing technique, the tool exctracts the solution from the image "solution.jpg" comparing it with the one found by the algorithm.
 
 	 
